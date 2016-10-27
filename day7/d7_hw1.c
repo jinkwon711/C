@@ -35,25 +35,25 @@ int main(){
     i++;
   }
 
-  bool flag;
-  int k,l;
-  for(k=0;k<strlen(x);k++){
-    for(i=0; i!=strlen(y);i++){
-      if(!(k+i)<strleng(x)) break;
-      if(!((y[i]==x[k+i])||(y[l]=='?'))){
-        flag=false;
-      }
-    if(flag){
-      for(i=0; i<strlen(y);i++){
-        x[i+k]=z[i];
-      }
-      k+=strlen(y);
-    }
-  }
-}
-
+  int flag;
+  int k;
   int j;
+  for(k=0;k+strlen(y)<strlen(x)+1;k++){
+    for(i=0; i<strlen(y);i++){
+      if((y[i]==x[k+i])||(y[i]=='?')){
+        flag++;
+      }
+    }
+    if(flag==strlen(y)){
+      for(j=0; j<strlen(y);j++){
+        x[j+k]=z[j];
+      }
+      k+=(strlen(y)-1);
+    }
+    flag=0;
+  }
 
+  j=0;
   for(j=0; j<strlen(x);j++){
     printf("%c",x[j]);
   }

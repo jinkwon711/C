@@ -1,0 +1,6 @@
+5
+insert i love grilled chicken 
+insert and fried
+delete fried love
+find chicken
+print
