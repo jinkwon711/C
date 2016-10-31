@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
  int i,k,l;
   int j;
   int isExist=0;
@@ -56,7 +57,6 @@ int main(){
         currQuery++;
 
 
-
   for(i=0; i<1000;i++){
     query[i]=0;
   }
@@ -70,42 +70,45 @@ int main(){
       i++;
 
   }
+
   ptr = strtok(query, " ");
   input[0] = ptr;
   j=1;
+  int flags = 1;
   while(ptr != NULL ){
           // printf( "%s\n" , ptr);
           ptr = strtok(NULL, " ");
+
+          // for(i=1;i<j;i++){
+          //   if(!strcmp(ptr,input[i-1])){
+          //     flags=0;
+          //   }
+          // }
+          if(flags){
           input[j]=ptr;
           j++;
-  }
+
+        }
+        // flags =1;
+   }
+
+
   // printf("%d\n",j);
   if(!strcmp("insert",input[0])){
     for(i=0; i<j-2;i++){
-
-    for(k=0; k<arrlen;k++){
-      if(!strcmp(wordList[k],input[i+1])){
-        isExist = 1;
+      for(k=0; k<arrlen;k++){
+        if(!strcmp(wordList[k],input[i+1])){
+          isExist = 1;
+        }
       }
+      if(!isExist){
+        wordList[arrlen]= (char *) malloc(strlen(input[i+1])*sizeof(char));
+         strcpy(wordList[arrlen],input[i+1]);
+         arrlen++;
+      }
+      isExist=0;
+
     }
-    if(!isExist){
-     wordList[arrlen+addlen]= (char *) malloc(strlen(input[i+1])*sizeof(char));
-           strcpy(wordList[arrlen+addlen],input[i+1]);
-           addlen++;
-    }
-    isExist=0;
-
-  }
-    // free(wordList[arrlen+i]);
-    // printf("%s\n",wordList[arrlen+i]);
-    // printf("%s\n",wordList[0]);
-
-
-     // input[i+1]=0;
-
-
-   arrlen+=addlen;
-   addlen=0;
   }
   else if(!strcmp("delete",input[0])){
 
