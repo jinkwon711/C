@@ -10,7 +10,6 @@
 void order(){
 
   for(j=0;j<arrlen-1;j++){
-    printf("%s","hi");
       for(i=0;i<arrlen-1;i++){
         if(strlen(wordList[i])>strlen(wordList[i+1])){
           char *temp = (char *)malloc(((strlen(wordList[i])+strlen(wordList[i+1])) + 1) * sizeof(char));
@@ -130,12 +129,13 @@ int main(){
 
   }
   else if(!strcmp("find",input[0])){
+        order();
+
     for(i=0;i<arrlen;i++){
       if(!strcmp(input[1],wordList[i]))
         printf("%d\n",i);
     }
 
-    order();
   }
   else if(!strcmp("print",input[0])){
     order();
