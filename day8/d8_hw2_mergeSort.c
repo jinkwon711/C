@@ -56,7 +56,7 @@ mergesort(Arr,0,input-1);
 for(int i=0; i!=input;i++){
         printf("%d ",Arr[i]);
     }
-
+    return 0;
 
 }
 
