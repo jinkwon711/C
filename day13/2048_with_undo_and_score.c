@@ -109,8 +109,8 @@ int main(){
 		print(curr);
 		if(quit1(curr)||quit2(curr)){
 			finalScore=curr->score;
-			print(curr);
-			printf("%d\n",finalScore-undoNum*5);
+			// print(curr);
+			printf("%d",finalScore-undoNum*5);
 			// printf("%d\n",cnt);
 			return 0;
 		}
