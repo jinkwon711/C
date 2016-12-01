@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 #ifdef ONLINE_JUDGE
 int getseed(){
 	return 0;
@@ -23,19 +22,16 @@ typedef struct _board{
 } board;
 
 int quit2(board *n){
+	if(n->tile[3][3]==0){
+		return 0;
+	}
 	for(int i=0; i<4; i++){
 		for(int j=0; j<4; j++){
-				// if(i>1){
-				// 	if(n->tile[i][j]!=n->tile[i-1][j]||n->tile[i][j]==0) return 0 ;
-				// }
-				// if(j>1){
-				// 	if(n->tile[i][j]!=n->tile[i][j-1]||n->tile[i][j]==0) return 0;
-				// }
-				if(i<4){
-					if(n->tile[i][j]==0||n->tile[i][j]==n->tile[i+1][j]) return 0;
-				}
-				if(j<4){
-					if(n->tile[i][j]==0||n->tile[i][j]==n->tile[i][j+1]) return 0;
+			if(i<3){
+				if(n->tile[i][j]==0||n->tile[i][j]==n->tile[i+1][j]) return 0;
+			}
+			if(j<3){
+				if(n->tile[i][j]==0||n->tile[i][j]==n->tile[i][j+1]) return 0;
 			}
 		}
 	}
@@ -45,7 +41,6 @@ int quit1(board *n){
 	for(int i=0; i<4; i++){
 		for(int j=0; j<4; j++){
 			if(n->tile[i][j]==2048) return 1;
-			
 		}
 	}
 	return 0;
@@ -103,14 +98,23 @@ int main(){
 	int undoNum=0;
 	int finalScore=0;
 	char com[10];
+	// int cnt=0;
 	
 	srand(getseed());
 	curr->tile[2][0] = 2;
 	curr->tile[3][3] = 2;
 
 	while(1){
+		// cnt++;
 		print(curr);
+		if(quit1(curr)||quit2(curr)){
+			finalScore=curr->score;
+			printf("%d\n",finalScore-undoNum*5);
+			// printf("%d\n",cnt);
+			return 0;
+		}
 		next = (board *) calloc(1, sizeof(board));
+		int tempScore = curr->score;
 		scanf("%s", com);
 		switch(com[0]){
 		case 'w':
@@ -124,7 +128,7 @@ int main(){
 					}
 					if(curr->tile[k+1][j]==curr->tile[i][j]){
 						next->tile[idx][j] =curr->tile[i][j]*2;
-						next->score=curr->score+ curr->tile[i][j]*2;
+						tempScore=tempScore+ curr->tile[i][j]*2;
 						idx++;
 						i=k+1;
 					}
@@ -138,7 +142,6 @@ int main(){
 				}
 			}
 		}
-
 			break;
 		case 'a':
 			for(int i=0;i<4;i++){
@@ -151,7 +154,7 @@ int main(){
 						}
 						if(curr->tile[i][k+1]==curr->tile[i][j]){
 							next->tile[i][idx] =curr->tile[i][j]*2;
-							next->score=curr->score+ curr->tile[i][j]*2;
+							tempScore=tempScore+ curr->tile[i][j]*2;
 							idx++;	
 							j=k+1;
 						}		
@@ -179,7 +182,7 @@ int main(){
 						}
 						if(curr->tile[k-1][j]==curr->tile[i][j]){
 							next->tile[idx][j] =curr->tile[i][j]*2;
-							next->score=curr->score+ curr->tile[i][j]*2;
+							tempScore=tempScore+ curr->tile[i][j]*2;
 							idx--;
 							i=k-1;
 						}
@@ -193,10 +196,6 @@ int main(){
 					}
 				}
 			}
-
-
-
-
 			break;
 		case 'd':
 		for(int i=0;i<4;i++){
@@ -209,7 +208,7 @@ int main(){
 					}
 					if(curr->tile[i][k-1]==curr->tile[i][j]){
 						next->tile[i][idx] =curr->tile[i][j]*2;
-						next->score=curr->score+ curr->tile[i][j]*2;
+						tempScore=tempScore+ curr->tile[i][j]*2;
 						idx--;						
 						j=k-1;
 					}
@@ -224,28 +223,33 @@ int main(){
 			}
 		}
 		break;
+		// case 'j':
+		// 	for(int i=0; i<4;i++){
+		// 		for(int j=0; j<4;j++){
+		// 			next->tile[i][j]=finalScore++;
+		// 		}
+		// 	}
+		// 	break;
 
 		case 'u':	
 			undoNum++;
 			if(curr->prev!=NULL) curr = curr->prev;
-			finalScore=curr->score;
-		break;
+			break;
 		case 'q':
+			finalScore=curr->score;
+			print(curr);
+			printf("%d\n",finalScore-undoNum*5);
 			while(curr->prev!=NULL){
 				board *temp = curr;
 				curr= curr->prev;
 				free(temp);
 			}
-			finalScore=curr->score;
-			printf("%d\n",finalScore-undoNum*5);
+			
 			return 0;
 		}
+
 		if(com[0] != 'u'){
-			finalScore=next->score;
-			if(quit1(next)||quit2(next)){
-				printf("%d\n",finalScore-undoNum*5);
-				return 0;
-			}
+			next->score=tempScore;
 			add2(next);
 			next->prev = curr;
 			curr = next;
