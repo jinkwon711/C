@@ -1,0 +1,266 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#pragma warning(disable:4996)
+
+#ifdef ONLINE_JUDGE
+int getseed() {
+	return 0;
+}
+#endif
+
+#ifndef ONLINE_JUDGE
+#include <time.h>
+int getseed() {
+	return time(NULL);
+}
+#endif
+
+typedef struct _board {
+	int tile[4][4];
+} board;
+
+typedef struct _record {
+	board b_list;
+	int plus_score;
+	struct _record* next_record;
+}record;
+
+record head;
+record* top;
+record defaultBoard;
+int score = 0;
+int new_score = 0;
+
+void print(board *a) {
+	int i, j;
+	printf("-----------------------------\n");
+	for (i = 0; i < 4; ++i) {
+		printf("|      |      |      |      |\n|");
+		for (j = 0; j < 4; ++j) {
+			if (a->tile[i][j] == 0) printf("      |");
+			else printf("%6d|", a->tile[i][j]);
+		}
+		printf("\n|      |      |      |      |\n");
+		printf("-----------------------------\n");
+	}
+	return;
+}
+
+/* randomly select a blank and put 2 in it. */
+void add2(board *a) {
+	int i, j;
+	int n, N = 0;
+	for (i = 0; i < 4; ++i) {
+		for (j = 0; j < 4; ++j) {
+			if (a->tile[i][j] == 0) N++;
+		}
+	}
+	if (N == 0) return;
+	n = rand() % N;
+	for (i = 0; i < 4; ++i) {
+		for (j = 0; j < 4; ++j) {
+			if (a->tile[i][j] == 0) {
+				if (n == 0) {
+					a->tile[i][j] = 2;
+					i = j = 4;
+				}
+				else n--;
+			}
+		}
+	}
+	return;
+}
+
+board* moveTile(board* b) {
+	new_score = 0;
+	int row, col;
+	//쭉 밀어주기
+	for (row = 0; row < 4; ++row) {
+		for (int i = 0; i < 3; ++i) {
+			for (col = 3; col > 0; --col) {
+				if (b->tile[row][col] != 0) {
+					if (b->tile[row][col - 1] == 0) {
+						b->tile[row][col - 1] = b->tile[row][col];
+						b->tile[row][col] = 0;
+					}
+				}
+			}
+		}
+	}
+	//합치기
+	for (row = 0; row < 4; ++row) {
+		for (col = 1; col < 4; ++col) {
+			if (b->tile[row][col] != 0) {
+				if (b->tile[row][col] == b->tile[row][col - 1]) {
+					b->tile[row][col - 1] *= 2;
+					new_score += b->tile[row][col - 1];
+					b->tile[row][col] = 0;
+				}
+			}
+		}
+	}
+	//쭉 밀어주기
+	for (row = 0; row < 4; ++row) {
+		for (int i = 0; i < 3; ++i) {
+			for (col = 3; col > 0; --col) {
+				if (b->tile[row][col] != 0) {
+					if (b->tile[row][col - 1] == 0) {
+						b->tile[row][col - 1] = b->tile[row][col];
+						b->tile[row][col] = 0;
+					}
+				}
+			}
+		}
+	}
+	score += new_score;
+	return b;
+}
+
+board* turnBoard(board* b, int rot) {
+	int row, col;
+	board tmp = *b;
+
+	for (int i = 0; i < rot; ++i) {
+		for (row = 0; row < 4; ++row) {
+			for (col = 0; col < 4; ++col) {
+				b->tile[col][3 - row] = tmp.tile[row][col];
+			}
+		}
+		tmp = *b;
+	}
+	return b;
+}
+
+//board를 담은 record 링크드리스트로 이어주기
+void recordBoard(board* b) {
+	record* tmp = (record*)malloc(sizeof(record));
+	tmp->b_list = *b;
+	tmp->next_record = head.next_record;
+	head.next_record = tmp;
+	top = head.next_record;
+	top->plus_score = new_score;
+}
+
+board* undoRecord() {
+	if (top->next_record == NULL) {
+		//top->b_list = defaultBoard.b_list;
+		score -= 5;
+		return &(top->b_list);
+	}
+	//undo를 할 수 있는 경우
+	else if (top->next_record != NULL) {
+		record* del_b = top;
+		score -= del_b->plus_score;
+		score -= 5;
+		head.next_record = top->next_record;
+		//free(del_b->b_list);
+		free(del_b);
+		top = head.next_record;
+		return &(top->b_list);
+	}
+}
+
+int checkGameOver(board* curr) {
+	int row, col;
+	for (row = 0; row < 4; ++row) {
+		for (col = 0; col < 4; ++col) {
+			if (curr->tile[row][col] == 2048) {
+				return 1;
+			}
+		}
+	}
+	//빈 칸이 있음
+	for (row = 0; row < 4; ++row) {
+		for (col = 0; col < 4; ++col) {
+			if(curr->tile[row][col] == 0){
+				return 0;
+			}
+		}
+	}
+	//인접한 수가 같은 쌍이 있음
+	for (row = 0; row < 3; ++row) {
+		for (col = 0; col < 3; ++col) {
+			if (curr->tile[row][col] == curr->tile[row][col + 1] || curr->tile[row][col] == curr->tile[row + 1][col]) {
+				return 0;
+			}
+		}
+	}
+	for (row = 0; row < 3; ++row) {
+		if (curr->tile[row][3] == curr->tile[row + 1][3]) {
+			return 0;
+		}
+	}
+	for (col = 0; col < 3; ++col) {
+		if (curr->tile[3][col] == curr->tile[3][col + 1]) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int main() {
+	board *curr = (board *)calloc(1, sizeof(board));
+	board *next;
+	//	int n;
+	//	int i, j, k;
+	char com[10];
+
+	head.next_record = NULL;
+	top = head.next_record;
+
+	srand(getseed());
+	curr->tile[2][0] = 2;
+	curr->tile[3][3] = 2;
+
+	defaultBoard.b_list = *curr;
+	defaultBoard.next_record = NULL;
+	head.next_record = &defaultBoard;
+	top = head.next_record;
+
+	while (1) {
+		print(curr);
+		if (checkGameOver(curr)) {
+			free(curr);
+			printf("%d\n", score);
+			return 0;
+		}
+		//printf("%d\n", score);
+		next = (board *)calloc(1, sizeof(board));
+		scanf("%s", com);
+		switch (com[0]) {
+		case 'w':
+			curr = turnBoard(curr, 3);
+			next = moveTile(curr);
+			next = turnBoard(next, 1);
+			break;
+		case 'a':
+			next = moveTile(curr);
+			break;
+		case 's':
+			curr = turnBoard(curr, 1);
+			next = moveTile(curr);
+			next = turnBoard(next, 3);
+			break;
+		case 'd':
+			curr = turnBoard(curr, 2);
+			next = moveTile(curr);
+			next = turnBoard(next, 2);
+			break;
+		case 'u':
+			memcpy(next, undoRecord(), sizeof(board));
+			curr = next;
+			break;
+		case 'q':
+			free(curr);
+			printf("%d\n", score);
+			return 0;
+		}
+		if (com[0] != 'u') {
+			add2(next);
+			recordBoard(next);
+			curr = next;
+		}
+	}
+}
+
