@@ -11,33 +11,46 @@ int main(int argc,char *argv[]){
 	char pattern[256];
 	fscanf(key,"%s",pattern);
 	char str[256];
-	int notEqual;
+	int Equal=0;
 	int first =0;
 	int second = 0;
+	int k=0;
+
+
 	while(fscanf(in,"%s",str)!=EOF){
+		// printf("%s\n",str);
+		// printf("%s\n",pattern);
 		first++;
-// printf("%s",str);
-		notEqual=0;
-		for(int i=0; i!=strlen(str);i++){
+		int loopsize= strlen(str)-strlen(pattern)+1;
+		if(loopsize<0) continue;
+		for(int i=0; i<loopsize;i++){
 			if(pattern[0]==str[i]){
+				// printf("%c\n",str[i]);
+				// printf("%c\n",pattern[0]);
+
+
 				second = i+1;
-				if(strlen(pattern)<=strlen(str)-i){
+				Equal=1;
 					for(int j=1; j!=strlen(pattern);j++){
 						if(pattern[j]!=str[i+j]){
-							notEqual=1;
+							Equal=0;
 							break;
 						}
 					}
-				if(notEqual) break;
-				else{
+
+				if(Equal){
 					fprintf(out,"%d %d\n",first,second);
-				}	
+					// printf("%d %d\n",first,second);
+
+					Equal=0;
 				}
 			}
 		}
-
-
 	}
+
+	fclose(in);
+	fclose(key);
+	fclose(out);
 
 	return 0;
 }
