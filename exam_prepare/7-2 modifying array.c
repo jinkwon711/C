@@ -25,9 +25,14 @@ int main(){
 
 		}
 		else if(!strcmp(token,"delete")){
-		char *token;
-
-
+			token =strtok(NULL, " '\n'");
+			while(token!=NULL){
+				for(int i=0; i<cnt;i++){
+					if(!strcmp(token,wordList[i])){
+						for(int j=i;wordList<j)
+					}
+				}
+			}
 		}
 		else if(!strcmp(token,"find")){
 
